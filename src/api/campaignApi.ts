@@ -8,6 +8,7 @@ export type Campaign = {
   openRate: number;
   clickRate: number;
   revenue: number;
+  status: 'active' | 'scheduled' | 'paused';
 };
 
 const mockCampaigns: Campaign[] = [
@@ -18,6 +19,7 @@ const mockCampaigns: Campaign[] = [
     openRate: 42.1,
     clickRate: 6.4,
     revenue: 58240,
+    status: 'active',
   },
   {
     id: 'cmp_1002',
@@ -26,6 +28,7 @@ const mockCampaigns: Campaign[] = [
     openRate: 38.7,
     clickRate: 5.1,
     revenue: 73110,
+    status: 'scheduled',
   },
   {
     id: 'cmp_1003',
@@ -34,6 +37,7 @@ const mockCampaigns: Campaign[] = [
     openRate: 29.3,
     clickRate: 3.7,
     revenue: 21400,
+    status: 'paused',
   },
   {
     id: 'cmp_1004',
@@ -42,6 +46,7 @@ const mockCampaigns: Campaign[] = [
     openRate: 61.8,
     clickRate: 12.9,
     revenue: 128900,
+    status: 'active',
   },
 ];
 
