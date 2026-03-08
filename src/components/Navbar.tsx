@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import type { AppDispatch, RootState } from '../store/store';
 import { setRole, type UserRole } from '../store/userSlice';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 
 function linkClassName({ isActive }: { isActive: boolean }) {
   return [
@@ -16,6 +16,14 @@ function linkClassName({ isActive }: { isActive: boolean }) {
 export default function Navbar() {
   const role = useSelector((s: RootState) => s.user.role);
   const dispatch = useDispatch<AppDispatch>();
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('userRole', role);
+    } catch {
+      return;
+    }
+  }, [role]);
 
   const onChangeRole = useCallback(
     (nextRole: UserRole) => {
