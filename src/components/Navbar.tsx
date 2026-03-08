@@ -50,14 +50,30 @@ export default function Navbar() {
           <div className="hidden rounded-full bg-white/5 px-3 py-2 text-xs text-slate-200/80 ring-1 ring-white/10 sm:block">
             Role
           </div>
-          <select
-            className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-100 outline-none ring-1 ring-transparent transition focus:ring-indigo-500/40"
-            value={role}
-            onChange={(e) => onChangeRole(e.target.value as UserRole)}
-          >
-            <option value="admin">Admin</option>
-            <option value="viewer">Viewer</option>
-          </select>
+          <div className="flex items-center rounded-full border border-white/10 bg-white/[0.04] p-1 shadow-[0_1px_0_0_rgba(255,255,255,0.06)_inset]">
+            <button
+              type="button"
+              onClick={() => onChangeRole('admin')}
+              className={
+                role === 'admin'
+                  ? 'rounded-full bg-emerald-500/20 px-3 py-1.5 text-sm font-semibold text-emerald-100 ring-1 ring-emerald-400/30'
+                  : 'rounded-full px-3 py-1.5 text-sm font-medium text-slate-200/80 hover:bg-white/10 hover:text-white'
+              }
+            >
+              Admin
+            </button>
+            <button
+              type="button"
+              onClick={() => onChangeRole('viewer')}
+              className={
+                role === 'viewer'
+                  ? 'rounded-full bg-sky-500/20 px-3 py-1.5 text-sm font-semibold text-sky-100 ring-1 ring-sky-400/30'
+                  : 'rounded-full px-3 py-1.5 text-sm font-medium text-slate-200/80 hover:bg-white/10 hover:text-white'
+              }
+            >
+              Viewer
+            </button>
+          </div>
         </div>
       </div>
 

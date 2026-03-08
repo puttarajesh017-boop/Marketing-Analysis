@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../store/store';
 import { auditLogger } from '../utils/auditLogger';
@@ -9,6 +9,92 @@ type Segment = {
   country: string;
   engagement: EngagementLevel;
 };
+
+type DropdownOption<T extends string> = {
+  label: string;
+  value: T;
+};
+
+function DropdownSelect<T extends string>({
+  label,
+  value,
+  options,
+  disabled,
+  onChange,
+}: {
+  label: string;
+  value: T;
+  options: DropdownOption<T>[];
+  disabled: boolean;
+  onChange: (next: T) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    function onPointerDown(e: PointerEvent) {
+      if (!rootRef.current) return;
+      if (rootRef.current.contains(e.target as Node)) return;
+      setOpen(false);
+    }
+
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') setOpen(false);
+    }
+
+    document.addEventListener('pointerdown', onPointerDown);
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown);
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, []);
+
+  const selected = useMemo(() => options.find((o) => o.value === value) ?? options[0], [options, value]);
+
+  return (
+    <div ref={rootRef} className="relative">
+      <label className="text-xs font-medium tracking-wide text-slate-300/70">{label}</label>
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => setOpen((v) => !v)}
+        className="mt-2 flex w-full items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-100 outline-none ring-1 ring-transparent transition hover:bg-white/10 focus:ring-pink-500/40 disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        <span className="truncate">{selected?.label}</span>
+        <span className="text-slate-300/70">▾</span>
+      </button>
+
+      {open && !disabled && (
+        <div className="absolute z-20 mt-2 w-full overflow-hidden rounded-xl border border-white/10 bg-slate-950/95 shadow-2xl shadow-black/40 backdrop-blur">
+          <div className="max-h-56 overflow-auto p-1">
+            {options.map((opt) => {
+              const active = opt.value === value;
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => {
+                    onChange(opt.value);
+                    setOpen(false);
+                  }}
+                  className={
+                    active
+                      ? 'flex w-full items-center justify-between rounded-lg bg-pink-500/15 px-3 py-2 text-left text-sm font-semibold text-pink-100 ring-1 ring-pink-400/20'
+                      : 'flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm text-slate-100 hover:bg-white/10'
+                  }
+                >
+                  <span className="truncate">{opt.label}</span>
+                  {active ? <span className="text-pink-200">✓</span> : null}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function SegmentBuilder() {
   const role = useSelector((s: RootState) => s.user.role);
@@ -39,37 +125,21 @@ export default function SegmentBuilder() {
 
       <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-6 shadow-[0_1px_0_0_rgba(255,255,255,0.06)_inset] backdrop-blur">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <div>
-            <label className="text-xs font-medium tracking-wide text-slate-300/70">COUNTRY</label>
-            <select
-              className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-100 outline-none ring-1 ring-transparent transition focus:ring-indigo-500/40 disabled:cursor-not-allowed disabled:opacity-60"
-              value={segment.country}
-              onChange={(e) => setSegment((s) => ({ ...s, country: e.target.value }))}
-              disabled={!canEdit}
-            >
-              {countries.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-          </div>
+          <DropdownSelect
+            label="COUNTRY"
+            value={segment.country}
+            options={countries.map((c) => ({ label: c, value: c }))}
+            disabled={!canEdit}
+            onChange={(next) => setSegment((s) => ({ ...s, country: next }))}
+          />
 
-          <div>
-            <label className="text-xs font-medium tracking-wide text-slate-300/70">ENGAGEMENT</label>
-            <select
-              className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-100 outline-none ring-1 ring-transparent transition focus:ring-indigo-500/40 disabled:cursor-not-allowed disabled:opacity-60"
-              value={segment.engagement}
-              onChange={(e) => setSegment((s) => ({ ...s, engagement: e.target.value as EngagementLevel }))}
-              disabled={!canEdit}
-            >
-              {engagementLevels.map((lvl) => (
-                <option key={lvl} value={lvl}>
-                  {lvl}
-                </option>
-              ))}
-            </select>
-          </div>
+          <DropdownSelect
+            label="ENGAGEMENT"
+            value={segment.engagement}
+            options={engagementLevels.map((lvl) => ({ label: lvl, value: lvl }))}
+            disabled={!canEdit}
+            onChange={(next) => setSegment((s) => ({ ...s, engagement: next }))}
+          />
 
           <div className="flex items-end">
             <button

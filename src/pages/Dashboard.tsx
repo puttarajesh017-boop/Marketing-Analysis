@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CampaignCard from '../components/CampaignCard';
 import { useCampaigns } from '../hooks/useCampaigns';
@@ -7,6 +7,7 @@ import { auditLogger } from '../utils/auditLogger';
 export default function Dashboard() {
   const navigate = useNavigate();
   const { data, isLoading, isError, error } = useCampaigns();
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
     auditLogger('viewed dashboard');
@@ -18,6 +19,13 @@ export default function Dashboard() {
     },
     [navigate]
   );
+
+  const filteredCampaigns = useMemo(() => {
+    const campaigns = data ?? [];
+    const q = search.trim().toLowerCase();
+    if (!q) return campaigns;
+    return campaigns.filter((c) => c.name.toLowerCase().includes(q));
+  }, [data, search]);
 
   if (isLoading) {
     return (
@@ -58,15 +66,30 @@ export default function Dashboard() {
           <p className="mt-2 text-sm text-slate-300/70">Monitor engagement and revenue across active sends.</p>
         </div>
         <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-slate-200 shadow-[0_1px_0_0_rgba(255,255,255,0.06)_inset] backdrop-blur">
-          {data?.length ?? 0} campaigns
+          {filteredCampaigns.length} campaigns
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        {data?.map((c) => (
-          <CampaignCard key={c.id} campaign={c} onOpen={onOpenCampaign} />
-        ))}
+      <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 shadow-[0_1px_0_0_rgba(255,255,255,0.06)_inset] backdrop-blur">
+        <input
+          placeholder="Search campaigns..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100 outline-none ring-1 ring-transparent transition placeholder:text-slate-300/50 focus:ring-pink-500/40"
+        />
       </div>
+
+      {filteredCampaigns.length === 0 ? (
+        <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-6 text-sm text-slate-200 shadow-[0_1px_0_0_rgba(255,255,255,0.06)_inset] backdrop-blur">
+          No campaigns found
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {filteredCampaigns.map((c) => (
+            <CampaignCard key={c.id} campaign={c} onOpen={onOpenCampaign} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

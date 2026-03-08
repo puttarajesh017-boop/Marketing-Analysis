@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getCampaignById } from '../api/campaignApi';
 import MetricsChart from '../components/MetricsChart';
@@ -15,6 +15,7 @@ function formatCurrency(value: number) {
 
 export default function CampaignDetails() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['campaign', id],
@@ -89,9 +90,21 @@ export default function CampaignDetails() {
           <h1 className="mt-1 truncate text-2xl font-semibold text-white">{data.name}</h1>
           <div className="mt-2 text-xs text-slate-300/70">ID: {data.id}</div>
         </div>
-        <Link className="inline-flex w-fit items-center rounded-full bg-white/5 px-4 py-2 text-sm font-medium text-white ring-1 ring-white/10 hover:bg-white/10" to="/">
-          Back
-        </Link>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="inline-flex w-fit items-center rounded-full bg-white/5 px-4 py-2 text-sm font-medium text-white ring-1 ring-white/10 hover:bg-white/10"
+          >
+            Back
+          </button>
+          <Link
+            className="inline-flex w-fit items-center rounded-full bg-indigo-500/10 px-4 py-2 text-sm font-medium text-indigo-100 ring-1 ring-indigo-400/20 hover:bg-indigo-500/15"
+            to="/"
+          >
+            Home
+          </Link>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
