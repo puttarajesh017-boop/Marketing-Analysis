@@ -32,6 +32,7 @@ function DropdownSelect<T extends string>({
   const rootRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
+    console.log('DropdownSelect useEffect');
     function onPointerDown(e: PointerEvent) {
       if (!rootRef.current) return;
       if (rootRef.current.contains(e.target as Node)) return;
