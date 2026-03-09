@@ -56,9 +56,12 @@ function delay(ms: number) {
   });
 }
 
-function createMockAdapter<T>(handler: (config: InternalAxiosRequestConfig) => T): AxiosAdapter {
+function createMockAdapter<T>(
+  handler: (config: InternalAxiosRequestConfig) => T,
+  delayMs: number = 450
+): AxiosAdapter {
   return async (config: InternalAxiosRequestConfig) => {
-    await delay(450);
+    await delay(delayMs);
 
     const response: AxiosResponse<T> = {
       data: handler(config),
@@ -76,7 +79,7 @@ export async function getCampaigns(): Promise<Campaign[]> {
   const res = await axiosClient.request<Campaign[]>({
     url: '/campaigns',
     method: 'GET',
-    adapter: createMockAdapter(() => mockCampaigns),
+    adapter: createMockAdapter(() => mockCampaigns, 1500),
   });
   return res.data;
 }

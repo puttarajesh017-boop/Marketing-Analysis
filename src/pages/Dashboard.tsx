@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CampaignCard from '../components/CampaignCard';
+import CampaignCardSkeleton from '../components/CampaignCardSkeleton';
 import { useCampaigns } from '../hooks/useCampaigns';
 import { auditLogger } from '../utils/auditLogger';
 
@@ -26,27 +27,6 @@ export default function Dashboard() {
     if (!q) return campaigns;
     return campaigns.filter((c) => c.name.toLowerCase().includes(q));
   }, [data, search]);
-
-  if (isLoading) {
-    return (
-      <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-6 shadow-[0_1px_0_0_rgba(255,255,255,0.06)_inset] backdrop-blur">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="text-sm font-semibold text-white">Loading campaigns…</div>
-            <div className="mt-2 text-sm text-slate-300/70">Fetching latest performance metrics.</div>
-          </div>
-          <div className="h-10 w-10 animate-pulse rounded-full bg-white/10" />
-        </div>
-
-        <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div className="h-32 rounded-2xl border border-white/10 bg-white/[0.03]" />
-          <div className="h-32 rounded-2xl border border-white/10 bg-white/[0.03]" />
-          <div className="h-32 rounded-2xl border border-white/10 bg-white/[0.03]" />
-          <div className="h-32 rounded-2xl border border-white/10 bg-white/[0.03]" />
-        </div>
-      </div>
-    );
-  }
 
   if (isError) {
     return (
@@ -79,7 +59,13 @@ export default function Dashboard() {
         />
       </div>
 
-      {filteredCampaigns.length === 0 ? (
+      {isLoading ? (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {Array.from({ length: 4 }).map((_, idx) => (
+            <CampaignCardSkeleton key={idx} />
+          ))}
+        </div>
+      ) : filteredCampaigns.length === 0 ? (
         <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-6 text-sm text-slate-200 shadow-[0_1px_0_0_rgba(255,255,255,0.06)_inset] backdrop-blur">
           No campaigns found
         </div>
